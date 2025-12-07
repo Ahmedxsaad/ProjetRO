@@ -1,0 +1,155 @@
+{
+  "name": "Alliage d'Aluminium 7075-T6 - Aéronautique",
+  "raw_materials": [
+    {
+      "name": "Aluminium Primaire",
+      "cost_per_kg": 2.8,
+      "availability": 5000,
+      "composition": {
+        "Al": 99.7,
+        "Fe": 0.2,
+        "Si": 0.1
+      },
+      "density": 2.70,
+      "purity": 99.7
+    },
+    {
+      "name": "Alliage Al-Zn",
+      "cost_per_kg": 4.5,
+      "availability": 2000,
+      "composition": {
+        "Al": 85.0,
+        "Zn": 14.5,
+        "Fe": 0.3,
+        "Si": 0.2
+      },
+      "density": 2.85,
+      "purity": 99.0
+    },
+    {
+      "name": "Alliage Al-Mg",
+      "cost_per_kg": 3.8,
+      "availability": 1500,
+      "composition": {
+        "Al": 93.0,
+        "Mg": 6.8,
+        "Fe": 0.15,
+        "Si": 0.05
+      },
+      "density": 2.68,
+      "purity": 99.5
+    },
+    {
+      "name": "Alliage Al-Cu",
+      "cost_per_kg": 6.2,
+      "availability": 1000,
+      "composition": {
+        "Al": 88.0,
+        "Cu": 11.5,
+        "Fe": 0.3,
+        "Si": 0.2
+      },
+      "density": 2.85,
+      "purity": 99.0
+    },
+    {
+      "name": "Ferrosilicium Aluminium",
+      "cost_per_kg": 2.1,
+      "availability": 800,
+      "composition": {
+        "Al": 85.0,
+        "Si": 12.0,
+        "Fe": 2.5,
+        "Ti": 0.3,
+        "Cr": 0.2
+      },
+      "density": 2.75,
+      "purity": 97.0
+    },
+    {
+      "name": "Alliage Master Ti-Al",
+      "cost_per_kg": 45.0,
+      "availability": 100,
+      "composition": {
+        "Ti": 5.0,
+        "Al": 94.5,
+        "Fe": 0.3,
+        "Si": 0.2
+      },
+      "density": 2.72,
+      "purity": 99.0
+    }
+  ],
+  "alloy_spec": {
+    "name": "Alliage Aluminium 7075-T6",
+    "target_weight": 500.0,
+    "elements": [
+      {
+        "symbol": "Al",
+        "name": "Aluminium",
+        "min_percent": 87.1,
+        "max_percent": 91.4,
+        "target_percent": null
+      },
+      {
+        "symbol": "Zn",
+        "name": "Zinc",
+        "min_percent": 5.1,
+        "max_percent": 6.1,
+        "target_percent": null
+      },
+      {
+        "symbol": "Mg",
+        "name": "Magnésium",
+        "min_percent": 2.1,
+        "max_percent": 2.9,
+        "target_percent": null
+      },
+      {
+        "symbol": "Cu",
+        "name": "Cuivre",
+        "min_percent": 1.2,
+        "max_percent": 2.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "Cr",
+        "name": "Chrome",
+        "min_percent": 0.18,
+        "max_percent": 0.28,
+        "target_percent": null
+      },
+      {
+        "symbol": "Fe",
+        "name": "Fer",
+        "min_percent": 0.0,
+        "max_percent": 0.50,
+        "target_percent": null
+      },
+      {
+        "symbol": "Si",
+        "name": "Silicium",
+        "min_percent": 0.0,
+        "max_percent": 0.40,
+        "target_percent": null
+      },
+      {
+        "symbol": "Ti",
+        "name": "Titane",
+        "min_percent": 0.0,
+        "max_percent": 0.20,
+        "target_percent": null
+      }
+    ],
+    "max_impurities": 1.5,
+    "min_hardness": null,
+    "max_hardness": null,
+    "melting_point_min": 475.0,
+    "melting_point_max": 635.0
+  },
+  "additional_constraints": {
+    "quality_grade": "Aerospace Grade",
+    "application": "Structures d'avions haute résistance",
+    "treatment": "T6 (Solution heat treated and artificially aged)"
+  }
+}

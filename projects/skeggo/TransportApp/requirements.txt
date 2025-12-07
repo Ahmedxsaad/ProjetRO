@@ -1,0 +1,8 @@
+
+# Initial requirements for the Transport Optimization Project
+gurobipy
+PyQt6
+matplotlib
+pandas
+numpy
+

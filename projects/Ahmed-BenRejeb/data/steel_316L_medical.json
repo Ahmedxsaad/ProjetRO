@@ -1,0 +1,149 @@
+{
+  "name": "Acier Inoxydable 316L - Production Standard",
+  "raw_materials": [
+    {
+      "name": "Ferraille Inox 316",
+      "cost_per_kg": 2.5,
+      "availability": 5000,
+      "composition": {
+        "Fe": 65.0,
+        "Cr": 17.0,
+        "Ni": 12.0,
+        "Mo": 2.5,
+        "C": 0.03,
+        "Mn": 2.0,
+        "Si": 0.75
+      },
+      "density": 8.0,
+      "purity": 98.0
+    },
+    {
+      "name": "Ferrochrome HC",
+      "cost_per_kg": 1.8,
+      "availability": 2000,
+      "composition": {
+        "Cr": 52.0,
+        "Fe": 40.0,
+        "C": 6.5,
+        "Si": 1.5
+      },
+      "density": 6.8,
+      "purity": 95.0
+    },
+    {
+      "name": "Nickel Primaire",
+      "cost_per_kg": 15.0,
+      "availability": 1000,
+      "composition": {
+        "Ni": 99.9,
+        "Co": 0.05,
+        "Fe": 0.05
+      },
+      "density": 8.9,
+      "purity": 99.9
+    },
+    {
+      "name": "Ferromolybdène",
+      "cost_per_kg": 25.0,
+      "availability": 200,
+      "composition": {
+        "Mo": 65.0,
+        "Fe": 32.0,
+        "C": 2.5,
+        "Si": 0.5
+      },
+      "density": 9.3,
+      "purity": 97.0
+    },
+    {
+      "name": "Fonte de Fer Pur",
+      "cost_per_kg": 0.5,
+      "availability": 10000,
+      "composition": {
+        "Fe": 94.0,
+        "C": 3.8,
+        "Si": 2.0,
+        "Mn": 0.2
+      },
+      "density": 7.2,
+      "purity": 96.0
+    },
+    {
+      "name": "Ferromanganèse",
+      "cost_per_kg": 1.2,
+      "availability": 1500,
+      "composition": {
+        "Mn": 78.0,
+        "Fe": 18.0,
+        "C": 3.5,
+        "Si": 0.5
+      },
+      "density": 7.4,
+      "purity": 96.0
+    }
+  ],
+  "alloy_spec": {
+    "name": "Acier Inoxydable 316L",
+    "target_weight": 1000.0,
+    "elements": [
+      {
+        "symbol": "Fe",
+        "name": "Fer",
+        "min_percent": 64.0,
+        "max_percent": 72.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "Cr",
+        "name": "Chrome",
+        "min_percent": 16.0,
+        "max_percent": 18.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "Ni",
+        "name": "Nickel",
+        "min_percent": 10.0,
+        "max_percent": 14.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "Mo",
+        "name": "Molybdène",
+        "min_percent": 2.0,
+        "max_percent": 3.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "C",
+        "name": "Carbone",
+        "min_percent": 0.0,
+        "max_percent": 0.08,
+        "target_percent": null
+      },
+      {
+        "symbol": "Mn",
+        "name": "Manganèse",
+        "min_percent": 0.0,
+        "max_percent": 2.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "Si",
+        "name": "Silicium",
+        "min_percent": 0.0,
+        "max_percent": 0.75,
+        "target_percent": null
+      }
+    ],
+    "max_impurities": 2.0,
+    "min_hardness": null,
+    "max_hardness": null,
+    "melting_point_min": 1400.0,
+    "melting_point_max": 1450.0
+  },
+  "additional_constraints": {
+    "quality_grade": "Medical/Food Grade",
+    "application": "Équipements chimiques et pharmaceutiques"
+  }
+}

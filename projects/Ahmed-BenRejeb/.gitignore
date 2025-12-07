@@ -1,0 +1,63 @@
+# Fichiers à ignorer pour Git
+
+# Environnement virtuel Python
+venv/
+env/
+.venv/
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Licence Gurobi (sensible)
+gurobi.lic
+*.lic
+
+# Fichiers de configuration locaux
+.env
+.env.local
+
+# Fichiers temporaires
+*.tmp
+*.bak
+*.swp
+*.log
+
+# Fichiers de système
+.DS_Store
+Thumbs.db
+
+# Résultats de tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Documentation générée
+docs/_build/

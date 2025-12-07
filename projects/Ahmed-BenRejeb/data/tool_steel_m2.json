@@ -1,0 +1,168 @@
+{
+  "name": "Acier Outil M2 - Haute Vitesse",
+  "raw_materials": [
+    {
+      "name": "Ferraille Acier Outil",
+      "cost_per_kg": 3.2,
+      "availability": 2000,
+      "composition": {
+        "Fe": 82.0,
+        "W": 6.0,
+        "Mo": 5.0,
+        "Cr": 4.0,
+        "V": 2.0,
+        "C": 0.9,
+        "Co": 0.1
+      },
+      "density": 8.1,
+      "purity": 97.0
+    },
+    {
+      "name": "Ferrotungstène",
+      "cost_per_kg": 55.0,
+      "availability": 300,
+      "composition": {
+        "W": 75.0,
+        "Fe": 22.0,
+        "C": 2.5,
+        "Si": 0.3,
+        "Mn": 0.2
+      },
+      "density": 15.8,
+      "purity": 97.0
+    },
+    {
+      "name": "Ferromolybdène HG",
+      "cost_per_kg": 28.0,
+      "availability": 400,
+      "composition": {
+        "Mo": 70.0,
+        "Fe": 28.0,
+        "C": 1.8,
+        "Si": 0.2
+      },
+      "density": 9.8,
+      "purity": 98.0
+    },
+    {
+      "name": "Ferrovanadium",
+      "cost_per_kg": 65.0,
+      "availability": 150,
+      "composition": {
+        "V": 80.0,
+        "Fe": 18.0,
+        "C": 1.5,
+        "Al": 0.3,
+        "Si": 0.2
+      },
+      "density": 6.1,
+      "purity": 98.0
+    },
+    {
+      "name": "Ferrochrome BC",
+      "cost_per_kg": 2.2,
+      "availability": 1000,
+      "composition": {
+        "Cr": 65.0,
+        "Fe": 32.0,
+        "C": 2.5,
+        "Si": 0.3,
+        "S": 0.2
+      },
+      "density": 7.2,
+      "purity": 97.0
+    },
+    {
+      "name": "Acier Bas Carbone",
+      "cost_per_kg": 0.8,
+      "availability": 8000,
+      "composition": {
+        "Fe": 99.2,
+        "C": 0.05,
+        "Mn": 0.4,
+        "Si": 0.2,
+        "P": 0.1,
+        "S": 0.05
+      },
+      "density": 7.85,
+      "purity": 99.0
+    },
+    {
+      "name": "Graphite",
+      "cost_per_kg": 1.5,
+      "availability": 500,
+      "composition": {
+        "C": 99.5,
+        "S": 0.3,
+        "Ash": 0.2
+      },
+      "density": 2.2,
+      "purity": 99.5
+    }
+  ],
+  "alloy_spec": {
+    "name": "Acier Outil Rapide M2",
+    "target_weight": 800.0,
+    "elements": [
+      {
+        "symbol": "Fe",
+        "name": "Fer",
+        "min_percent": 79.0,
+        "max_percent": 84.0,
+        "target_percent": null
+      },
+      {
+        "symbol": "W",
+        "name": "Tungstène",
+        "min_percent": 5.5,
+        "max_percent": 6.75,
+        "target_percent": null
+      },
+      {
+        "symbol": "Mo",
+        "name": "Molybdène",
+        "min_percent": 4.5,
+        "max_percent": 5.5,
+        "target_percent": null
+      },
+      {
+        "symbol": "Cr",
+        "name": "Chrome",
+        "min_percent": 3.75,
+        "max_percent": 4.50,
+        "target_percent": null
+      },
+      {
+        "symbol": "V",
+        "name": "Vanadium",
+        "min_percent": 1.75,
+        "max_percent": 2.20,
+        "target_percent": null
+      },
+      {
+        "symbol": "C",
+        "name": "Carbone",
+        "min_percent": 0.78,
+        "max_percent": 1.05,
+        "target_percent": null
+      },
+      {
+        "symbol": "Co",
+        "name": "Cobalt",
+        "min_percent": 0.0,
+        "max_percent": 0.50,
+        "target_percent": null
+      }
+    ],
+    "max_impurities": 1.0,
+    "min_hardness": 62.0,
+    "max_hardness": 66.0,
+    "melting_point_min": 1500.0,
+    "melting_point_max": 1600.0
+  },
+  "additional_constraints": {
+    "quality_grade": "Tool Steel Grade",
+    "application": "Outils de coupe haute vitesse, fraises, forets",
+    "treatment": "Trempe et revenu"
+  }
+}

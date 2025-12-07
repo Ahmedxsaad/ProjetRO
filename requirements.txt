@@ -1,0 +1,15 @@
+# Core Dependencies
+PySide6
+PyQt6
+PyQt5
+gurobipy
+matplotlib
+networkx
+numpy
+pandas
+scipy
+
+# Additional Dependencies from Sub-projects
+openpyxl
+pillow
+requests

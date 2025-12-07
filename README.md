@@ -32,7 +32,12 @@ This repository contains a collection of Operations Research (RO) projects devel
 -   **Language**: Python 3
 -   **GUI Frameworks**: PySide6, PyQt6, PyQt5 (All integrated)
 -   **Solvers**: Gurobi, Custom Algorithms
--   **Dependencies**: All necessary libraries are pre-installed in the provided virtual environment (`venv`).
+-   **Install Dependencies**:
+    The projects use a mix of libraries (`PySide6`, `PyQt6`, `PyQt5`, `Gurobi`, `matplotlib`, `networkx`). We have provided a global requirements file to install everything at once.
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *(Note: Ensure you have `libxcb-cursor0` installed on Linux: `sudo apt install libxcb-cursor0`)*
 
 ## ⚠️ Note on Execution
 

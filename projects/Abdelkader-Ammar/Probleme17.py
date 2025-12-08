@@ -152,7 +152,7 @@ class MaxFlowGUI(QWidget):
         font.setBold(True)
         font.setPointSize(10)
         label_item.setFont(font)
-        label_item.setDefaultTextColor(Qt.GlobalColor.blue) 
+        label_item.setDefaultTextColor(Qt.GlobalColor.white) 
         label_rect = label_item.boundingRect()
         label_item.setPos(mid_x, mid_y - label_rect.height()) 
         label_item.setZValue(5) 

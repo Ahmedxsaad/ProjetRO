@@ -3,15 +3,14 @@ import string
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QGroupBox
+    QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QGroupBox,
+    QHeaderView
 )
 from PyQt6.QtCore import QThread, pyqtSignal
 import gurobipy as gp
 from gurobipy import GRB
-
 
 # --- WORKER THREAD FOR GUROBI (Prevents GUI Freezing) ---
 class OptimizationWorker(QThread):
@@ -22,7 +21,7 @@ class OptimizationWorker(QThread):
         super().__init__()
         self.nodes = nodes                  # [{'id': 'A', 'cost': 10.0}, ...]
         self.edges = edges                  # [('A','B'), ('B','C'), ...]
-        self.incompatibilities = incompatibilities
+        self.incompatibilities = incompatibilities # [('A', 'C'), ...]
 
     def run(self):
         try:
@@ -32,15 +31,19 @@ class OptimizationWorker(QThread):
             gate_ids = [n["id"] for n in self.nodes]
             x = m.addVars(gate_ids, vtype=GRB.BINARY, name="x")
 
+            # Objective: Minimize total cost
             m.setObjective(
                 gp.quicksum(n["cost"] * x[n["id"]] for n in self.nodes),
                 GRB.MINIMIZE
             )
 
+            # Constraint 1: Coverage (Vertex Cover)
             for u, v in self.edges:
                 m.addConstr(x[u] + x[v] >= 1, name=f"cover_{u}_{v}")
 
+            # Constraint 2: Incompatibility (Mutual Exclusion)
             for u, v in self.incompatibilities:
+                # Ensure u and v are actually in the variable set before adding constraint
                 if u in x and v in x:
                     m.addConstr(x[u] + x[v] <= 1, name=f"conflict_{u}_{v}")
 
@@ -49,6 +52,8 @@ class OptimizationWorker(QThread):
             if m.status == GRB.OPTIMAL:
                 selected = [gid for gid in gate_ids if x[gid].X > 0.5]
                 self.result_ready.emit((selected, m.objVal))
+            elif m.status == GRB.INFEASIBLE:
+                 self.error_occurred.emit("Infeasible: Constraints cannot be satisfied (Conflict blocking coverage).")
             else:
                 self.error_occurred.emit(f"No optimal solution found (status={m.status}).")
 
@@ -63,48 +68,69 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Projet RO - Prob 15: Circuit Gate Optimization")
-        self.resize(1200, 800)
+        self.resize(1300, 900)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
 
-        # LEFT PANEL
+        # LEFT PANEL: Inputs
         input_panel = QGroupBox("Configuration du Circuit")
         input_layout = QVBoxLayout()
 
-        # Gates table
+        # 1. Gates table
         self.table_gates = QTableWidget(0, 2)
         self.table_gates.setHorizontalHeaderLabels(["Gate ID", "Cost (Weight)"])
         self.table_gates.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         input_layout.addWidget(QLabel("1. Définir les Portes (Sommets):"))
         input_layout.addWidget(self.table_gates)
 
-        # Wires table
+        # 2. Wires table
         self.table_wires = QTableWidget(0, 2)
         self.table_wires.setHorizontalHeaderLabels(["From Gate", "To Gate"])
         self.table_wires.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         input_layout.addWidget(QLabel("2. Définir les Fils (Arêtes):"))
         input_layout.addWidget(self.table_wires)
 
+        # 3. Incompatibilities table (NEW ADDITION)
+        self.table_incomp = QTableWidget(0, 2)
+        self.table_incomp.setHorizontalHeaderLabels(["Gate A", "Gate B"])
+        self.table_incomp.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        input_layout.addWidget(QLabel("3. Définir les Incompatibilités (Conflits):"))
+        input_layout.addWidget(self.table_incomp)
+
+        # -- Buttons for Tables --
+        
         # Add buttons
         btn_add_layout = QHBoxLayout()
         self.btn_add_gate = QPushButton("Ajouter Porte")
         self.btn_add_gate.clicked.connect(self.add_gate_row)
+        
         self.btn_add_wire = QPushButton("Ajouter Fil")
         self.btn_add_wire.clicked.connect(self.add_wire_row)
+
+        self.btn_add_incomp = QPushButton("Ajouter Conflit")
+        self.btn_add_incomp.clicked.connect(self.add_incomp_row)
+
         btn_add_layout.addWidget(self.btn_add_gate)
         btn_add_layout.addWidget(self.btn_add_wire)
+        btn_add_layout.addWidget(self.btn_add_incomp)
         input_layout.addLayout(btn_add_layout)
 
         # Delete buttons
         btn_del_layout = QHBoxLayout()
-        self.btn_del_gate = QPushButton("Supprimer Porte(s)")
+        self.btn_del_gate = QPushButton("Supprimer Porte")
         self.btn_del_gate.clicked.connect(self.delete_selected_gates)
-        self.btn_del_wire = QPushButton("Supprimer Fil(s)")
+        
+        self.btn_del_wire = QPushButton("Supprimer Fil")
         self.btn_del_wire.clicked.connect(self.delete_selected_wires)
+
+        self.btn_del_incomp = QPushButton("Supprimer Conflit")
+        self.btn_del_incomp.clicked.connect(self.delete_selected_incomp)
+
         btn_del_layout.addWidget(self.btn_del_gate)
         btn_del_layout.addWidget(self.btn_del_wire)
+        btn_del_layout.addWidget(self.btn_del_incomp)
         input_layout.addLayout(btn_del_layout)
 
         # Solve button
@@ -146,16 +172,11 @@ class MainWindow(QMainWindow):
         return ids
 
     def _next_gate_id(self):
-        """Generate A, B, C... then A1, B1... if needed."""
         existing = set(self._get_gate_ids_in_table())
         letters = list(string.ascii_uppercase)
-
-        # Try single letters first
         for ch in letters:
             if ch not in existing:
                 return ch
-
-        # Then A1..Z1, A2..Z2, ...
         k = 1
         while True:
             for ch in letters:
@@ -169,116 +190,143 @@ class MainWindow(QMainWindow):
         row = self.table_gates.rowCount()
         self.table_gates.insertRow(row)
         self.table_gates.setItem(row, 0, QTableWidgetItem(self._next_gate_id()))
-        self.table_gates.setItem(row, 1, QTableWidgetItem("10"))  # default cost
+        self.table_gates.setItem(row, 1, QTableWidgetItem("10"))
 
     def add_wire_row(self):
         gate_ids = self._get_gate_ids_in_table()
         u_default = gate_ids[0] if len(gate_ids) >= 1 else "A"
         v_default = gate_ids[1] if len(gate_ids) >= 2 else "B"
-
         row = self.table_wires.rowCount()
         self.table_wires.insertRow(row)
         self.table_wires.setItem(row, 0, QTableWidgetItem(u_default))
         self.table_wires.setItem(row, 1, QTableWidgetItem(v_default))
 
+    def add_incomp_row(self):
+        gate_ids = self._get_gate_ids_in_table()
+        u_default = gate_ids[0] if len(gate_ids) >= 1 else ""
+        v_default = gate_ids[2] if len(gate_ids) >= 3 else "" # Suggest C if available
+        row = self.table_incomp.rowCount()
+        self.table_incomp.insertRow(row)
+        self.table_incomp.setItem(row, 0, QTableWidgetItem(u_default))
+        self.table_incomp.setItem(row, 1, QTableWidgetItem(v_default))
+
     def delete_selected_gates(self):
-        rows = sorted({idx.row() for idx in self.table_gates.selectedIndexes()}, reverse=True)
-        if not rows:
-            QMessageBox.information(self, "Info", "Sélectionnez une ou plusieurs lignes dans la table des Portes.")
-            return
-        for r in rows:
-            self.table_gates.removeRow(r)
+        self._delete_rows(self.table_gates)
 
     def delete_selected_wires(self):
-        rows = sorted({idx.row() for idx in self.table_wires.selectedIndexes()}, reverse=True)
+        self._delete_rows(self.table_wires)
+
+    def delete_selected_incomp(self):
+        self._delete_rows(self.table_incomp)
+
+    def _delete_rows(self, table_widget):
+        rows = sorted({idx.row() for idx in table_widget.selectedIndexes()}, reverse=True)
         if not rows:
-            QMessageBox.information(self, "Info", "Sélectionnez une ou plusieurs lignes dans la table des Fils.")
+            QMessageBox.information(self, "Info", "Sélectionnez une ou plusieurs lignes à supprimer.")
             return
         for r in rows:
-            self.table_wires.removeRow(r)
+            table_widget.removeRow(r)
 
     # ------------- demo data -------------
     def load_demo_data(self):
-        # Clear current
         self.table_gates.setRowCount(0)
         self.table_wires.setRowCount(0)
+        self.table_incomp.setRowCount(0)
 
-        # Gates A..E
-        for gid in ["A", "B", "C", "D", "E"]:
+        # 1. Gates
+        gates = [("A", "10"), ("B", "10"), ("C", "5")]
+        for gid, cost in gates:
             row = self.table_gates.rowCount()
             self.table_gates.insertRow(row)
             self.table_gates.setItem(row, 0, QTableWidgetItem(gid))
-            self.table_gates.setItem(row, 1, QTableWidgetItem("10"))
+            self.table_gates.setItem(row, 1, QTableWidgetItem(cost))
 
-        # Wires (same structure as before, but with letters)
-        wires = [("A", "B"), ("B", "C"), ("C", "D"), ("D", "E"), ("A", "E"), ("B", "D")]
+        # 2. Wires
+        wires = [("A", "B"), ("B", "C"), ("C", "A")]
         for u, v in wires:
             row = self.table_wires.rowCount()
             self.table_wires.insertRow(row)
             self.table_wires.setItem(row, 0, QTableWidgetItem(u))
             self.table_wires.setItem(row, 1, QTableWidgetItem(v))
+        
+        # 3. Incompatibilities (Empty by default, user can add A-C to test)
+        # To test automatically, uncomment below:
+        # row = self.table_incomp.rowCount()
+        # self.table_incomp.insertRow(row)
+        # self.table_incomp.setItem(row, 0, QTableWidgetItem("A"))
+        # self.table_incomp.setItem(row, 1, QTableWidgetItem("C"))
 
     # ------------- data extraction + validation -------------
     def get_data_from_ui(self):
         nodes = []
         edges = []
+        incompatibilities = []
 
         try:
-            # Read gates
+            # 1. Read gates
             for r in range(self.table_gates.rowCount()):
                 item_id = self.table_gates.item(r, 0)
                 item_cost = self.table_gates.item(r, 1)
-                if item_id is None or item_cost is None:
-                    raise ValueError("Missing gate cell.")
+                if item_id is None or item_cost is None: continue
                 gid = item_id.text().strip()
-                if not gid:
-                    raise ValueError("Empty gate ID.")
+                if not gid: continue
                 cost = float(item_cost.text())
                 nodes.append({"id": gid, "cost": cost})
 
             gate_ids = [n["id"] for n in nodes]
             if len(set(gate_ids)) != len(gate_ids):
-                QMessageBox.warning(self, "Erreur", "Gate IDs dupliqués détectés. Chaque Gate ID doit être unique.")
-                return None, None
+                QMessageBox.warning(self, "Erreur", "Gate IDs dupliqués détectés.")
+                return None, None, None
             gate_set = set(gate_ids)
 
-            # Read wires
+            # 2. Read wires
             for r in range(self.table_wires.rowCount()):
                 item_u = self.table_wires.item(r, 0)
                 item_v = self.table_wires.item(r, 1)
-                if item_u is None or item_v is None:
-                    raise ValueError("Missing wire cell.")
+                if item_u is None or item_v is None: continue
                 u = item_u.text().strip()
                 v = item_v.text().strip()
-                if not u or not v:
-                    raise ValueError("Empty wire endpoint.")
-                if u == v:
-                    QMessageBox.warning(self, "Erreur", f"Fil invalide (boucle) à la ligne {r+1}: ({u},{v}).")
-                    return None, None
+                if not u or not v: continue
+                
                 if u not in gate_set or v not in gate_set:
-                    QMessageBox.warning(
-                        self, "Erreur",
-                        f"Le fil ({u},{v}) référence une porte inexistante. Ajoutez la porte ou corrigez le fil."
-                    )
-                    return None, None
+                    QMessageBox.warning(self, "Erreur", f"Le fil ({u},{v}) référence une porte inexistante.")
+                    return None, None, None
                 edges.append((u, v))
 
-        except ValueError:
-            QMessageBox.warning(self, "Erreur", "Vérifiez que tous les champs sont remplis et les coûts numériques.")
-            return None, None
+            # 3. Read Incompatibilities (NEW)
+            for r in range(self.table_incomp.rowCount()):
+                item_u = self.table_incomp.item(r, 0)
+                item_v = self.table_incomp.item(r, 1)
+                if item_u is None or item_v is None: continue
+                u = item_u.text().strip()
+                v = item_v.text().strip()
+                if not u or not v: continue
 
-        return nodes, edges
+                if u not in gate_set or v not in gate_set:
+                    QMessageBox.warning(self, "Erreur", f"Le conflit ({u},{v}) référence une porte inexistante.")
+                    return None, None, None
+                incompatibilities.append((u, v))
+
+        except ValueError:
+            QMessageBox.warning(self, "Erreur", "Vérifiez que les coûts sont numériques.")
+            return None, None, None
+
+        return nodes, edges, incompatibilities
 
     # ------------- optimization -------------
     def run_optimization(self):
-        nodes, edges = self.get_data_from_ui()
-        if not nodes:
+        data = self.get_data_from_ui()
+        if not data or data[0] is None:
             return
+        
+        # Unpack all 3
+        nodes, edges, incompatibilities = data
 
         self.btn_solve.setEnabled(False)
         self.lbl_result.setText("Status: Calcul en cours...")
 
-        self.worker = OptimizationWorker(nodes, edges, [])
+        # Pass incompatibilities to the worker
+        self.worker = OptimizationWorker(nodes, edges, incompatibilities)
         self.worker.result_ready.connect(self.handle_result)
         self.worker.error_occurred.connect(self.handle_error)
         self.worker.start()
@@ -302,18 +350,23 @@ class MainWindow(QMainWindow):
     # ------------- visualization -------------
     def update_graph_viz(self, selected_nodes):
         self.figure.clear()
-        nodes, edges = self.get_data_from_ui()
-        if not nodes:
+        
+        # Get data properly unpacking the 3 items
+        data = self.get_data_from_ui()
+        if not data or data[0] is None:
             return
+        nodes, edges, incompatibilities = data
 
         G = nx.Graph()
         for n in nodes:
             G.add_node(n["id"])
         for u, v in edges:
             G.add_edge(u, v)
+        
+        # Add conflict edges just for visualization (optional, dashed lines?)
+        # For now, we stick to the wire graph to keep it clean, as per original requirement.
 
-        pos = nx.spring_layout(G)
-
+        pos = nx.spring_layout(G, seed=42) # Seed for consistent layout
         color_map = ["red" if n["id"] in selected_nodes else "lightblue" for n in nodes]
 
         ax = self.figure.add_subplot(111)
@@ -323,7 +376,6 @@ class MainWindow(QMainWindow):
         )
         ax.set_title("Visualisation du Circuit (Rouge = Sélectionné)")
         self.canvas.draw()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
